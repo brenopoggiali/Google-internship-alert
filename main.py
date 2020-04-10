@@ -1,5 +1,5 @@
 from sitemap import get_jobs
-from jobs import get_internships
+from jobs import get_internships, parse_jobs
 
 
 def print_internships_by_country(internships):
@@ -9,8 +9,7 @@ def print_internships_by_country(internships):
 if __name__ == '__main__':
     print("Getting jobs...")
     jobs = get_jobs()
-    print("Getting internships...")
-    internships = get_internships(jobs)
-    for internship in internships:
-        print(internship)
+    internships_urls = get_internships(jobs)
+    print(f"Parsing {len(internships_urls)} internships... ")
+    internships = parse_jobs(internships_urls)
     # print_internships_by_country(internships)

@@ -1,12 +1,5 @@
-import time
 from bs4 import BeautifulSoup
 from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.common.exceptions import TimeoutException
-from selenium.webdriver.support.expected_conditions \
-    import presence_of_element_located
-
 
 HEADER_CLASS = 'gc-card__header gc-job-detail__header'
 
@@ -65,16 +58,23 @@ def get_job_locations(header):
 
 def get_internships(jobs):
     internships = []
-    count = 0
     for job in jobs:
         url = job['loc']
-        if 'intern' in url:
-            count += 1
-            header = get_job_header(url)
-            if header is None:
-                continue
-            job['Title'] = get_job_title(header)
-            job['Locations'] = get_job_locations(header)
-            print(f"Found {count} internships - {job['Title']} - {url}")
+        mid = '-intern-' in url
+        end = '-intern/' in url
+        if mid or end:
             internships.append(job)
     return internships
+
+
+def parse_jobs(jobs):
+    jobs_parsed = []
+    for count, job in enumerate(jobs):
+        url = job['loc']
+        while 'Title' not in job or not len(job['Title']):
+            header = get_job_header(url)
+            job['Title'] = get_job_title(header)
+            job['Locations'] = get_job_locations(header)
+        print(f"{count+1} loaded: {job['Title']} - {job['Locations']}")
+        jobs_parsed.append(job)
+    return jobs_parsed
