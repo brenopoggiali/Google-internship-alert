@@ -71,10 +71,10 @@ def parse_jobs(jobs):
     jobs_parsed = []
     for count, job in enumerate(jobs):
         url = job['loc']
-        while 'Title' not in job or not len(job['Title']):
+        while 'title' not in job or not len(job['title']):
             header = get_job_header(url)
-            job['Title'] = get_job_title(header)
-            job['Locations'] = get_job_locations(header)
-        print(f"{count+1} loaded: {job['Title']} - {job['Locations']}")
+            job['title'] = get_job_title(header)
+            job['locations'] = get_job_locations(header)
+        print(f"{count+1} loaded: {job['title']} - {job['locations']}")
         jobs_parsed.append(job)
     return jobs_parsed
