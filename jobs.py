@@ -1,5 +1,6 @@
 from bs4 import BeautifulSoup
 from selenium import webdriver
+from joblib import Parallel, delayed
 
 HEADER_CLASS = 'gc-card__header gc-job-detail__header'
 
@@ -67,14 +68,16 @@ def get_internships(jobs):
     return internships
 
 
+def process_job(job):
+    url = job['loc']
+    while 'title' not in job or not len(job['title']):
+        header = get_job_header(url)
+        job['title'] = get_job_title(header)
+        job['locations'] = get_job_locations(header)
+    print(f"Loaded: {job['title']} - {job['locations']}")
+    return job
+
+
 def parse_jobs(jobs):
-    jobs_parsed = []
-    for count, job in enumerate(jobs):
-        url = job['loc']
-        while 'title' not in job or not len(job['title']):
-            header = get_job_header(url)
-            job['title'] = get_job_title(header)
-            job['locations'] = get_job_locations(header)
-        print(f"{count+1} loaded: {job['title']} - {job['locations']}")
-        jobs_parsed.append(job)
+    jobs_parsed = Parallel(n_jobs=-1)(delayed(process_job)(j) for j in jobs)
     return jobs_parsed
