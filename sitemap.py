@@ -1,12 +1,13 @@
-import requests
 import xmltodict
+from browsers import load_firefox
 
 GOOGLE_SITEMAP_URL = "https://careers.google.com/jobs/sitemap"
 
 
 def get_xml():
-    response = requests.get(GOOGLE_SITEMAP_URL)
-    jobs_data = xmltodict.parse(response.content)
+    browser = load_firefox()
+    browser.get(GOOGLE_SITEMAP_URL)
+    jobs_data = xmltodict.parse(browser.page_source)
     return jobs_data
 
 
@@ -16,5 +17,12 @@ def get_jobs():
     return jobs
 
 
-# if __name__ == '__main__':
-#     get_jobs()
+def get_internships(jobs):
+    internships = []
+    for job in jobs:
+        url = job['loc']
+        mid = '-intern-' in url
+        end = '-intern/' in url
+        if mid or end:
+            internships.append(job)
+    return internships

@@ -1,7 +1,7 @@
 import os
-from sitemap import get_jobs
+from jobs import parse_jobs
 from tabulate import tabulate
-from jobs import get_internships, parse_jobs
+from sitemap import get_jobs, get_internships
 
 
 def clean_screen():
@@ -23,7 +23,7 @@ def get_countries(locations):
 def print_internships(internships):
     table = []
     for internship in internships:
-        url = internship['loc']
+        url = internship['url']
         title = internship['title']
         countries = get_countries(internship['locations'])
         link = get_terminal_link(url)
