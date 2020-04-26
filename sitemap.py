@@ -8,6 +8,7 @@ def get_xml():
     browser = load_firefox()
     browser.get(GOOGLE_SITEMAP_URL)
     jobs_data = xmltodict.parse(browser.page_source)
+    browser.quit()
     return jobs_data
 
 
