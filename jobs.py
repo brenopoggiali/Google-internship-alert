@@ -1,32 +1,18 @@
-from bs4 import BeautifulSoup
-from selenium import webdriver
-from joblib import Parallel, delayed
+from browsers import load_chrome, parse_html
 
 HEADER_CLASS = 'gc-card__header gc-job-detail__header'
 
 
-def load_browser():
-    options = webdriver.firefox.options.Options()
-    options.add_argument('--headless')
-    browser = webdriver.Firefox(options=options)
-    return browser
+def load_tabs(browser, jobs):
+    tabs = []
+    for idx, job in enumerate(jobs):
+        arg = f"window.open('{job['loc']}', 'tab{idx+1}');"
+        browser.execute_script(arg)
+        tabs.append(f'tab{idx+1}')
+    return tabs
 
 
-def get_page(job_url):
-    browser = load_browser()
-    browser.get(job_url)
-    return browser
-
-
-def parse_html(browser):
-    html = browser.page_source
-    page = BeautifulSoup(html, 'html.parser')
-    browser.quit()
-    return page
-
-
-def get_job_header(url):
-    browser_page = get_page(url)
+def get_job_header(browser_page):
     page = parse_html(browser_page)
     header = page.find('div', {'class': HEADER_CLASS})
     return header
@@ -57,27 +43,30 @@ def get_job_locations(header):
     return locations
 
 
-def get_internships(jobs):
-    internships = []
-    for job in jobs:
-        url = job['loc']
-        mid = '-intern-' in url
-        end = '-intern/' in url
-        if mid or end:
-            internships.append(job)
-    return internships
-
-
-def process_job(job):
-    url = job['loc']
+def process_job(browser):
+    job = {}
     while 'title' not in job or not len(job['title']):
-        header = get_job_header(url)
+        header = get_job_header(browser)
+        if header is None:
+            continue
         job['title'] = get_job_title(header)
         job['locations'] = get_job_locations(header)
+        job['url'] = browser.current_url
     print(f"Loaded: {job['title']} - {job['locations']}")
     return job
 
 
+def process_jobs(browser, tabs):
+    jobs_parsed = []
+    for tab in tabs:
+        browser.switch_to.window(tab)
+        jobs_parsed.append(process_job(browser))
+    return jobs_parsed
+
+
 def parse_jobs(jobs):
-    jobs_parsed = Parallel(n_jobs=-1)(delayed(process_job)(j) for j in jobs)
+    browser = load_chrome()
+    tabs = load_tabs(browser, jobs)
+    jobs_parsed = process_jobs(browser, tabs)
+    browser.quit()
     return jobs_parsed
