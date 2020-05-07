@@ -12,8 +12,7 @@ def load_tabs(browser, jobs):
     return tabs
 
 
-def get_job_header(browser_page):
-    page = parse_html(browser_page)
+def get_job_header(page):
     header = page.find('div', {'class': HEADER_CLASS})
     return header
 
@@ -43,14 +42,23 @@ def get_job_locations(header):
     return locations
 
 
+def is_job_open(page):
+    closed_message = 'Applications are currently closed for this role.'
+    if closed_message in str(page):
+        return 'Closed'
+    return 'Open'
+
+
 def process_job(browser):
     job = {}
     while 'title' not in job or not len(job['title']):
-        header = get_job_header(browser)
+        page = parse_html(browser)
+        header = get_job_header(page)
         if header is None:
             continue
         job['title'] = get_job_title(header)
         job['locations'] = get_job_locations(header)
+        job['valid'] = is_job_open(page)
         job['url'] = browser.current_url
     print(f"Loaded: {job['title']} - {job['locations']}")
     return job
