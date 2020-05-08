@@ -34,7 +34,7 @@ def print_internships(internships):
     return
 
 
-if __name__ == '__main__':
+def main():
     print("Getting jobs...")
     jobs = get_jobs()
     internships_urls = get_internships(jobs)
@@ -42,3 +42,7 @@ if __name__ == '__main__':
     internships = parse_jobs(internships_urls)
     clean_screen()
     print_internships(internships)
+
+
+if __name__ == '__main__':
+    main()
