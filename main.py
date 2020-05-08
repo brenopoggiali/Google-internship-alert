@@ -30,7 +30,7 @@ def print_internships(internships):
         link = get_terminal_link(url)
         table.append([title,  countries, valid, link])
     table = sorted(table, key=lambda x: ([-ord(c) for c in x[2]], x[1]))
-    print(tabulate(table, headers=['Title', 'Countries', 'Valid', 'Link']))
+    print(tabulate(table, headers=['Title', 'Countries', 'Status', 'Link']))
     return
 
 
