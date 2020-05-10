@@ -22,7 +22,7 @@ def get_job_title(header):
     return title.text
 
 
-def get_job_locations(header):
+def get_job_locations_by_header(header):
     locations = []
     for div in header.find_all('div', itemprop='address'):
         city = div.find('div', itemprop="addressLocality")
@@ -42,6 +42,31 @@ def get_job_locations(header):
     return locations
 
 
+def get_job_locations_by_page(page):
+    locations_message = 'Note: By applying to this position your application'
+    locations = []
+    if locations_message in page:
+        locs = page.split(locations_message)[1]
+        locs = locs.split('<b>')[1]
+        locs = locs.split('</b>')[0]
+        locs = locs.split(';')
+        for location in locs:
+            location = location.split(',')
+            city = location[0].strip()
+            state = location[1].strip()
+            country = location[-1].strip()
+            if len(location) <= 2:
+                state = None
+            locations.append([country, state, city])
+    return locations
+
+
+def get_job_locations(page, header):
+    locations = get_job_locations_by_header(header)
+    locations += get_job_locations_by_page(str(page))
+    return locations
+
+
 def is_job_open(page):
     closed_message = 'Applications are currently closed for this role.'
     if closed_message in str(page):
@@ -57,7 +82,7 @@ def process_job(browser):
         if header is None:
             continue
         job['title'] = get_job_title(header)
-        job['locations'] = get_job_locations(header)
+        job['locations'] = get_job_locations(page, header)
         job['valid'] = is_job_open(page)
         job['url'] = browser.current_url
     print(f"Loaded: {job['title']} - {job['locations']}")

@@ -30,11 +30,11 @@ def print_internships(internships):
         link = get_terminal_link(url)
         table.append([title,  countries, valid, link])
     table = sorted(table, key=lambda x: ([-ord(c) for c in x[2]], x[1]))
-    print(tabulate(table, headers=['Title', 'Countries', 'Valid', 'Link']))
+    print(tabulate(table, headers=['Title', 'Countries', 'Status', 'Link']))
     return
 
 
-if __name__ == '__main__':
+def main():
     print("Getting jobs...")
     jobs = get_jobs()
     internships_urls = get_internships(jobs)
@@ -42,3 +42,7 @@ if __name__ == '__main__':
     internships = parse_jobs(internships_urls)
     clean_screen()
     print_internships(internships)
+
+
+if __name__ == '__main__':
+    main()
